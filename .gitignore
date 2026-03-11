@@ -1,3 +1,4 @@
 node_modules/
 config/bot.json
+config/allowedUsers.json
 logs/

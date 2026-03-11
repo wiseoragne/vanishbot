@@ -1,8 +1,4 @@
-const allowedUsers = [
-  "1101637133850132572", // oragne
-  "1377592848634871819", // bigmacrk
-  "1234369914291359806", // alex4lifv
-];
+const allowedUsers = require("../../config/allowedUsers.json");
 
 module.exports = {
   data: {
