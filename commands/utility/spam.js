@@ -76,11 +76,13 @@ module.exports = {
 async function handleChannelSpam(interaction) {
   const message = interaction.options.getString("message");
   const count = interaction.options.getInteger("count");
-  const maxCount = 50;
+
+  // Apply different limits depending on context
+  const maxCount = interaction.inGuild() ? 50 : 5;
 
   if (count > maxCount) {
     return interaction.reply({
-      content: `Max count is ${maxCount}.`,
+      content: `Max count for this context is **${maxCount}**.`,
       flags: 64,
     });
   }
@@ -91,9 +93,19 @@ async function handleChannelSpam(interaction) {
     flags: 64,
   });
 
-  // Send messages to the channel
-  for (let i = 0; i < count; i++) {
-    await interaction.channel.send(message);
+  // Send messages to the channel or DM
+  if (!interaction.inGuild()) {
+    // Use followUp for DMs since there's no channel to send to
+    for (let i = 0; i < count; i++) {
+      await interaction.followUp({
+        content: message
+      });
+    }
+  } else {
+    // Send messages to the guild channel
+    for (let i = 0; i < count; i++) {
+      await interaction.channel.send(message);
+    }
   }
 }
 
