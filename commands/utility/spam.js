@@ -60,7 +60,7 @@ module.exports = {
     // Restrict command usage to approved user IDs
     if (!isAllowed("spam", interaction.user.id, interaction.contextType)) {
       return interaction.reply({
-        content: "You are not allowed to use this command in this context.",
+        content: "You are not allowed to use this command.",
         flags: 64,
       });
     }
