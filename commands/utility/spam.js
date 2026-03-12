@@ -55,7 +55,7 @@ module.exports = {
   },
 
   async execute(interaction) {
-    interaction.contextType = interaction.inGuild() ? "guild" : "dm";
+    interaction.contextType = interaction.inGuild() ? "guild" : "user";
 
     const subcommand = interaction.options.getSubcommand();
 
@@ -132,7 +132,7 @@ async function handleChannelSpam(interaction, contextType) {
   }
 
   // DM context
-  if (interaction.contextType === "dm") {
+  if (interaction.contextType === "user") {
     const maxCount = 5;
 
     if (count > maxCount) {
