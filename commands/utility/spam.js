@@ -75,39 +75,81 @@ module.exports = {
   },
 };
 
-async function handleChannelSpam(interaction) {
+async function handleChannelSpam(interaction, contextType) {
   const message = interaction.options.getString("message");
   const count = interaction.options.getInteger("count");
 
-  // Apply different limits depending on context
-  const maxCount = interaction.contextType === "guild" ? 50 : 5;
+  const botInGuild = interaction.inGuild() && interaction.channel;
+  const clientId = interaction.client.user.id;
 
-  if (count > maxCount) {
-    return interaction.reply({
-      content: `Max count for this context is **${maxCount}**.`,
-      flags: 64,
-    });
-  }
+  // Bot IS in the guild
+  if (botInGuild) {
+    const maxCount = 50;
 
-  // Acknowledge the command before sending additional messages
-  await interaction.reply({
-    content: `Sending ${count} ${count === 1 ? 'message' : 'messages'}...`,
-    flags: 64,
-  });
-
-  // Send messages to the channel or DM
-  if (interaction.contextType !== "guild") {
-    // Use followUp for DMs since there's no channel to send to
-    for (let i = 0; i < count; i++) {
-      await interaction.followUp({
-        content: message
+    if (count > maxCount) {
+      return interaction.reply({
+        content: `Max count is **${maxCount}**.`,
+        flags: 64,
       });
     }
-  } else {
-    // Send messages to the guild channel
+
+    await interaction.reply({
+      content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
+      flags: 64,
+    });
+
     for (let i = 0; i < count; i++) {
       await interaction.channel.send(message);
     }
+
+    return;
+  }
+
+  // Bot is NOT in the guild (user-installed command used in a guild)
+  if (interaction.inGuild() && !botInGuild) {
+    const maxCount = 5;
+    const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}`;
+
+    if (count > maxCount) {
+      return interaction.reply({
+        content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite the bot](${inviteUrl}).`,
+        flags: 64,
+      });
+    }
+
+    await interaction.reply({
+      content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
+      flags: 64,
+    });
+
+    for (let i = 0; i < count; i++) {
+      await interaction.followUp({ content: message });
+    }
+
+    return;
+  }
+
+  // DM context
+  if (!interaction.inGuild()) {
+    const maxCount = 5;
+
+    if (count > maxCount) {
+      return interaction.reply({
+        content: `Max count in DMs is **${maxCount}**.`,
+        flags: 64,
+      });
+    }
+
+    await interaction.reply({
+      content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
+      flags: 64,
+    });
+
+    for (let i = 0; i < count; i++) {
+      await interaction.followUp({ content: message });
+    }
+
+    return;
   }
 }
 
@@ -119,7 +161,7 @@ async function handleDmSpam(interaction) {
 
   if (count > maxCount) {
     return interaction.reply({
-      content: `Max count is ${maxCount}.`,
+      content: `Max count is **${maxCount}**.`,
       flags: 64,
     });
   }
