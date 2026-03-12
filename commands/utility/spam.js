@@ -55,7 +55,7 @@ module.exports = {
   },
 
   async execute(interaction) {
-    interaction.contextType = interaction.inGuild() ? "guild" : "user";
+    interaction.contextType = interaction.inGuild() ? "guild" : "dm";
 
     const subcommand = interaction.options.getSubcommand();
 
@@ -108,7 +108,7 @@ async function handleChannelSpam(interaction, contextType) {
   }
 
   // Bot is NOT in the guild (user-installed command used in a guild)
-  if (interaction.inGuild() && !botInGuild) {
+  if (interaction.contextType === "guild" && !botInGuild) {
     const maxCount = 5;
     const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}`;
 
@@ -132,7 +132,7 @@ async function handleChannelSpam(interaction, contextType) {
   }
 
   // DM context
-  if (!interaction.inGuild()) {
+  if (interaction.contextType === "dm") {
     const maxCount = 5;
 
     if (count > maxCount) {
