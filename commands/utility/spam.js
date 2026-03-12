@@ -1,4 +1,4 @@
-const allowedUsers = require("../../config/allowedUsers.json");
+const { isAllowed } = require("../../utils/allowedUsers");
 
 module.exports = {
   data: {
@@ -55,10 +55,12 @@ module.exports = {
   },
 
   async execute(interaction) {
+    interaction.contextType = interaction.inGuild() ? "guild" : "user";
+
     // Restrict command usage to approved user IDs
-    if (!allowedUsers.includes(interaction.user.id)) {
+    if (!isAllowed("spam", interaction.user.id, interaction.contextType)) {
       return interaction.reply({
-        content: "You are not allowed to use this command.",
+        content: "You are not allowed to use this command in this context.",
         flags: 64,
       });
     }
@@ -78,7 +80,7 @@ async function handleChannelSpam(interaction) {
   const count = interaction.options.getInteger("count");
 
   // Apply different limits depending on context
-  const maxCount = interaction.inGuild() ? 50 : 5;
+  const maxCount = interaction.contextType === "guild" ? 50 : 5;
 
   if (count > maxCount) {
     return interaction.reply({
@@ -94,7 +96,7 @@ async function handleChannelSpam(interaction) {
   });
 
   // Send messages to the channel or DM
-  if (!interaction.inGuild()) {
+  if (interaction.contextType !== "guild") {
     // Use followUp for DMs since there's no channel to send to
     for (let i = 0; i < count; i++) {
       await interaction.followUp({
