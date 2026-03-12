@@ -16,12 +16,20 @@ async function loadAllowedUsers(client) {
     const app = await client.application.fetch();
     botOwnerId = app.owner.id;
 
-    // Replace "botOwner" placeholders (assuming single-user ownership)
-    for (const command of Object.keys(allowedConfig)) {
+    // Replace "botOwner" placeholders in defaults
+    ["user", "guild"].forEach(type => {
+        allowedConfig.default[type] = allowedConfig.default[type].map(entry =>
+            entry === "botOwner" ? botOwnerId : entry
+        );
+    });
+
+    // Replace "botOwner" placeholders in overrides
+    for (const command of Object.keys(allowedConfig.overrides)) {
         ["user", "guild"].forEach(type => {
-            allowedConfig[command][type] = allowedConfig[command][type].map(entry =>
-                entry === "botOwner" ? botOwnerId : entry
-            );
+            allowedConfig.overrides[command][type] =
+                allowedConfig.overrides[command][type].map(entry =>
+                    entry === "botOwner" ? botOwnerId : entry
+                );
         });
     }
 }
@@ -31,10 +39,15 @@ function isAllowed(commandName, userId, contextType) {
         throw new Error("allowedUsers not loaded. Call loadAllowedUsers(client) first.");
     }
 
-    const command = allowedConfig[commandName];
-    if (!command) return false;
+    const override = allowedConfig.overrides[commandName];
 
-    return command[contextType]?.includes(userId) ?? false;
+    // If override exists AND is non-empty > use override
+    if (override && override[contextType].length > 0) {
+        return override[contextType].includes(userId);
+    }
+
+    // Otherwise use global defaults
+    return allowedConfig.default[contextType].includes(userId);
 }
 
 module.exports = {
