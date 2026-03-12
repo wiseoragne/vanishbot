@@ -1,5 +1,9 @@
 {
-  "spam": {
+  "spam channel": {
+    "user": ["botOwner", "110163..."],
+    "guild": ["botOwner", "137759...", "123436..."]
+  },
+  "spam dm": {
     "user": ["botOwner", "110163..."],
     "guild": ["botOwner", "137759...", "123436..."]
   }

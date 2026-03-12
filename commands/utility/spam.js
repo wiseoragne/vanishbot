@@ -57,15 +57,17 @@ module.exports = {
   async execute(interaction) {
     interaction.contextType = interaction.inGuild() ? "guild" : "user";
 
-    // Restrict command usage to approved user IDs
-    if (!isAllowed("spam", interaction.user.id, interaction.contextType)) {
+    const subcommand = interaction.options.getSubcommand();
+
+    // Differentiate permissions
+    const permissionKey = `spam ${subcommand}`;
+
+    if (!isAllowed(permissionKey, interaction.user.id, interaction.contextType)) {
       return interaction.reply({
         content: "You are not allowed to use this command.",
         flags: 64,
       });
     }
-
-    const subcommand = interaction.options.getSubcommand();
 
     if (subcommand === "channel") {
       await handleChannelSpam(interaction);
