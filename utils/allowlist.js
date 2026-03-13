@@ -1,16 +1,16 @@
 const fs = require("fs");
 const path = require("path");
 
-let allowedConfig = null;
+let allowlist = null;
 let botOwnerId = null;
 
-async function loadAllowedUsers(client) {
+async function loadAllowlist(client) {
     const raw = fs.readFileSync(
-        path.join(__dirname, "../config/allowedUsers.json"),
+        path.join(__dirname, "../config/allowlist.json"),
         "utf8"
     );
 
-    allowedConfig = JSON.parse(raw);
+    allowlist = JSON.parse(raw);
 
     // Fetch bot owner
     const app = await client.application.fetch();
@@ -18,16 +18,16 @@ async function loadAllowedUsers(client) {
 
     // Replace "botOwner" placeholders in defaults
     ["user", "guild"].forEach(type => {
-        allowedConfig.default[type] = allowedConfig.default[type].map(entry =>
+        allowlist.default[type] = allowlist.default[type].map(entry =>
             entry === "botOwner" ? botOwnerId : entry
         );
     });
 
     // Replace "botOwner" placeholders in overrides
-    for (const command of Object.keys(allowedConfig.overrides)) {
+    for (const command of Object.keys(allowlist.overrides)) {
         ["user", "guild"].forEach(type => {
-            allowedConfig.overrides[command][type] =
-                allowedConfig.overrides[command][type].map(entry =>
+            allowlist.overrides[command][type] =
+                allowlist.overrides[command][type].map(entry =>
                     entry === "botOwner" ? botOwnerId : entry
                 );
         });
@@ -35,11 +35,11 @@ async function loadAllowedUsers(client) {
 }
 
 function isAllowed(commandName, userId, contextType) {
-    if (!allowedConfig) {
-        throw new Error("allowedUsers not loaded. Call loadAllowedUsers(client) first.");
+    if (!allowlist) {
+        throw new Error("Allowlist not loaded. Call loadAllowlist(client) first.");
     }
 
-    const override = allowedConfig.overrides[commandName];
+    const override = allowlist.overrides[commandName];
 
     // If override exists AND is non-empty > use override
     if (override && override[contextType].length > 0) {
@@ -47,10 +47,16 @@ function isAllowed(commandName, userId, contextType) {
     }
 
     // Otherwise use global defaults
-    return allowedConfig.default[contextType].includes(userId);
+    return allowlist.default[contextType].includes(userId);
+}
+
+// Added for reload command
+async function reloadAllowlist(client) {
+    await loadAllowlist(client);
 }
 
 module.exports = {
-    loadAllowedUsers,
-    isAllowed
+    loadAllowlist,
+    isAllowed,
+    reloadAllowlist,
 };

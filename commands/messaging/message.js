@@ -1,4 +1,4 @@
-const { isAllowed } = require("../../utils/allowedUsers");
+const { isAllowed } = require("../../utils/allowlist");
 
 module.exports = {
   data: {
@@ -138,16 +138,16 @@ async function handleChannelMsg(interaction) {
     const maxCount = 5;
     const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}`;
 
-    if (count > maxCount) {
+    if (replyID) {
       return interaction.reply({
-        content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite me](${inviteUrl}).`,
+        content: `The reply feature only works in servers I'm a member of.\n\nPlease [invite me](${inviteUrl}) to reply to messages.`,
         flags: 64,
       });
     }
 
-    if (replyID) {
+    if (count > maxCount) {
       return interaction.reply({
-        content: `The reply feature only works in servers I'm a member of.\n\nPlease [invite me](${inviteUrl}) to reply to messages.`,
+        content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite me](${inviteUrl}).`,
         flags: 64,
       });
     }
@@ -168,16 +168,16 @@ async function handleChannelMsg(interaction) {
   if (interaction.contextType === "user") {
     const maxCount = 5;
 
-    if (count > maxCount) {
+    if (replyID) {
       return interaction.reply({
-        content: `Max count in DMs is **${maxCount}**.`,
+        content: "The reply feature does not support DMs.",
         flags: 64,
       });
     }
 
-    if (replyID) {
+    if (count > maxCount) {
       return interaction.reply({
-        content: "The reply feature does not support DMs.",
+        content: `Max count in DMs is **${maxCount}**.`,
         flags: 64,
       });
     }
