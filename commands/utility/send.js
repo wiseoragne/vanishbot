@@ -2,15 +2,15 @@ const { isAllowed } = require("../../utils/allowedUsers");
 
 module.exports = {
   data: {
-    name: "spam",
-    description: "Send a message multiple times",
+    name: "send",
+    description: "Send a message in a channel or DM a user multiple times.",
     integration_types: [0, 1], // Supports both guild installation and user installation
     contexts: [0, 1, 2], // Enables usage in guilds, bot DMs, and private DMs
     options: [
       {
         type: 1,
         name: "channel",
-        description: "Spam a message in the current channel",
+        description: "Send a message in the current channel",
         options: [
           {
             type: 3,
@@ -21,8 +21,8 @@ module.exports = {
           {
             type: 4,
             name: "count",
-            description: "How many times to send it",
-            required: true,
+            description: "How many times to send it (default is 1)",
+            required: false,
           },
           {
             type: 3,
@@ -35,12 +35,12 @@ module.exports = {
       {
         type: 1,
         name: "dm",
-        description: "Spam a message to a user via DM",
+        description: "Send a message to a user via DM",
         options: [
           {
             type: 6,
             name: "user",
-            description: "User to spam",
+            description: "User to message",
             required: true,
           },
           {
@@ -52,8 +52,8 @@ module.exports = {
           {
             type: 4,
             name: "count",
-            description: "How many times to send it",
-            required: true,
+            description: "How many times to send it (default is 1)",
+            required: false,
           },
         ],
       },
@@ -66,7 +66,7 @@ module.exports = {
     const subcommand = interaction.options.getSubcommand();
 
     // Differentiate permissions
-    const permissionKey = `spam ${subcommand}`;
+    const permissionKey = `send ${subcommand}`;
 
     if (!isAllowed(permissionKey, interaction.user.id, interaction.contextType)) {
       return interaction.reply({
@@ -76,16 +76,16 @@ module.exports = {
     }
 
     if (subcommand === "channel") {
-      await handleChannelSpam(interaction);
+      await handleChannelSend(interaction);
     } else if (subcommand === "dm") {
-      await handleDmSpam(interaction);
+      await handleDmSend(interaction);
     }
   },
 };
 
-async function handleChannelSpam(interaction, contextType) {
+async function handleChannelSend(interaction, contextType) {
   const message = interaction.options.getString("message");
-  const count = interaction.options.getInteger("count");
+  const count = interaction.options.getInteger("count") ?? 1;
 
   const botInGuild = interaction.inGuild() && interaction.channel;
   const clientId = interaction.client.user.id;
@@ -195,10 +195,10 @@ async function handleChannelSpam(interaction, contextType) {
   }
 }
 
-async function handleDmSpam(interaction) {
+async function handleDmSend(interaction) {
   const targetUser = interaction.options.getUser("user");
   const message = interaction.options.getString("message");
-  const count = interaction.options.getInteger("count");
+  const count = interaction.options.getInteger("count") ?? 1;
   const maxCount = 50;
 
   if (count > maxCount) {

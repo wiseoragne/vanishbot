@@ -12,12 +12,12 @@
   },
 
   "overrides": {
-    "spam channel": {
+    "send channel": {
       "user": [],
       "guild": []
     },
 
-    "spam dm": {
+    "send dm": {
       "user": ["botOwner", "110163..."],
       "guild": ["botOwner", "137759...", "123436..."]
     }
