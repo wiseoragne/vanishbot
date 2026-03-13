@@ -93,37 +93,6 @@ async function handleChannelMsg(interaction) {
   const replyID = interaction.options.getString("reply");
   let reference = null;
 
-  // Bot is NOT in the guild (user-installed command used in a guild)
-  if (interaction.contextType === "guild" && !botInGuild) {
-    const maxCount = 5;
-    const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}`;
-
-    if (replyID) {
-      return interaction.reply({
-        content: `The reply feature only works in servers I'm a member of.\n\nPlease [invite me](${inviteUrl}) to reply to messages.`,
-        flags: 64,
-      });
-    }
-
-    if (count > maxCount) {
-      return interaction.reply({
-        content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite me](${inviteUrl}).`,
-        flags: 64,
-      });
-    }
-
-    await interaction.reply({
-      content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
-      flags: 64,
-    });
-
-    for (let i = 0; i < count; i++) {
-      await interaction.followUp({ content: message });
-    }
-
-    return;
-  }
-
   // Bot IS in the guild
   if (botInGuild) {
     const maxCount = 50;
@@ -148,6 +117,36 @@ async function handleChannelMsg(interaction) {
       }
     }
 
+    // Bot is NOT in the guild (user-installed command used in a guild)
+    if (interaction.contextType === "guild" && !botInGuild) {
+      const maxCount = 5;
+      const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}`;
+
+      if (replyID) {
+        return interaction.reply({
+          content: `The reply feature only works in servers I'm a member of.\n\nPlease [invite me](${inviteUrl}) to reply to messages.`,
+          flags: 64,
+        });
+      }
+
+      if (count > maxCount) {
+        return interaction.reply({
+          content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite me](${inviteUrl}).`,
+          flags: 64,
+        });
+      }
+
+      await interaction.reply({
+        content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
+        flags: 64,
+      });
+
+      for (let i = 0; i < count; i++) {
+        await interaction.followUp({ content: message });
+      }
+
+      return;
+    }
 
     await interaction.reply({
       content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
