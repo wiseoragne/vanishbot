@@ -1,5 +1,3 @@
-const { isAllowed } = require("../../utils/allowlist");
-
 module.exports = {
   data: {
     name: "invite",
@@ -10,15 +8,6 @@ module.exports = {
 
   async execute(interaction) {
     interaction.contextType = interaction.inGuild() ? "guild" : "user";
-
-    // Permission check
-    const permissionKey = "invite";
-    if (!isAllowed(permissionKey, interaction.user.id, interaction.contextType)) {
-      return interaction.reply({
-        content: "You are not allowed to use this command.",
-        flags: 64,
-      });
-    }
 
     const clientId = interaction.client.user.id;
     const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}`;
