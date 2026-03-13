@@ -26,14 +26,14 @@ module.exports = {
     // DM context
     if (interaction.contextType === "user") {
       return interaction.reply({
-        content: `You cannot invite the bot to a DM, but you can still invite it to a server using this link:\n\n${inviteUrl}`,
+        content: `You can't invite me to a DM, but you can still invite me to a server using this link:\n\n${inviteUrl}`,
         flags: 64,
       });
     }
 
     // Guild context
     return interaction.reply({
-      content: `Use this link to invite the bot to your server:\n\n${inviteUrl}`,
+      content: `Use this link to invite me to your server:\n\n${inviteUrl}`,
       flags: 64,
     });
   },
