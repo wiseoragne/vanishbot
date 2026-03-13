@@ -24,6 +24,12 @@ module.exports = {
             description: "How many times to send it",
             required: true,
           },
+          {
+            type: 3,
+            name: "reply",
+            description: "Message ID to reply to (servers only)",
+            required: false
+          },
         ],
       },
       {
@@ -84,6 +90,9 @@ async function handleChannelSpam(interaction, contextType) {
   const botInGuild = interaction.inGuild() && interaction.channel;
   const clientId = interaction.client.user.id;
 
+  const replyID = interaction.options.getString("reply");
+  let reference = null;
+
   // Bot IS in the guild
   if (botInGuild) {
     const maxCount = 50;
@@ -95,13 +104,30 @@ async function handleChannelSpam(interaction, contextType) {
       });
     }
 
+    // If replyID was provided, try to fetch the message
+    if (replyID) {
+      try {
+        const targetMessage = await interaction.channel.messages.fetch(replyID);
+        reference = { messageReference: targetMessage.id };
+      } catch {
+        return interaction.reply({
+          content: `I couldn't find a message with ID **${replyID}** in this channel.`,
+          flags: 64,
+        });
+      }
+    }
+
+
     await interaction.reply({
       content: `Sending ${count} ${count === 1 ? "message" : "messages"}...`,
       flags: 64,
     });
 
     for (let i = 0; i < count; i++) {
-      await interaction.channel.send(message);
+      await interaction.channel.send({
+        content: message,
+        reply: reference ?? undefined,
+      });
     }
 
     return;
@@ -114,7 +140,14 @@ async function handleChannelSpam(interaction, contextType) {
 
     if (count > maxCount) {
       return interaction.reply({
-        content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite the bot](${inviteUrl}).`,
+        content: `Max count in servers I'm not a member of is **${maxCount}**.\n\nFor higher limits, please [invite me](${inviteUrl}).`,
+        flags: 64,
+      });
+    }
+
+    if (replyID) {
+      return interaction.reply({
+        content: `The reply feature only works in servers I'm a member of.\n\nPlease [invite me](${inviteUrl}) to reply to messages.`,
         flags: 64,
       });
     }
@@ -138,6 +171,13 @@ async function handleChannelSpam(interaction, contextType) {
     if (count > maxCount) {
       return interaction.reply({
         content: `Max count in DMs is **${maxCount}**.`,
+        flags: 64,
+      });
+    }
+
+    if (replyID) {
+      return interaction.reply({
+        content: "The reply feature does not support DMs.",
         flags: 64,
       });
     }
