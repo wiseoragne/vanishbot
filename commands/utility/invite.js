@@ -3,7 +3,7 @@ const { isAllowed } = require("../../utils/allowlist");
 module.exports = {
   data: {
     name: "invite",
-    description: "Get the link to invite the bot to your server.",
+    description: "Get a link to invite the bot to your server.",
     integration_types: [0, 1], // Supports both guild installation and user installation
     contexts: [0, 1, 2], // Enables usage in guilds, bot DMs, and private DMs
   },
