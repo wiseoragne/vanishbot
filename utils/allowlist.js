@@ -43,14 +43,36 @@ function isAllowed(commandName, userId, contextType) {
 
     // If override exists AND is non-empty > use override
     if (override && override[contextType].length > 0) {
+
+        // Special case: allow everyone
+        if (override[contextType].includes("everyone")) {
+            return true;
+        }
+
+        // Special case: disabled command
+        if (override[contextType].includes("disabled")) {
+            return false;
+        }
+
         return override[contextType].includes(userId);
     }
 
     // Otherwise use global defaults
+
+    // Special case: allow everyone
+    if (allowlist.default[contextType].includes("everyone")) {
+        return true;
+    }
+
+    // Special case: disabled command
+    if (allowlist.default[contextType].includes("disabled")) {
+        return false;
+    }
+
     return allowlist.default[contextType].includes(userId);
 }
 
-// Added for reload command
+// For reload command
 async function reloadAllowlist(client) {
     await loadAllowlist(client);
 }
