@@ -2,14 +2,14 @@ const { isAllowed } = require("../../utils/allowedUsers");
 
 module.exports = {
   data: {
-    name: "send",
+    name: "message",
     description: "Send a message in a channel or DM a user multiple times.",
     integration_types: [0, 1], // Supports both guild installation and user installation
     contexts: [0, 1, 2], // Enables usage in guilds, bot DMs, and private DMs
     options: [
       {
         type: 1,
-        name: "channel",
+        name: "here",
         description: "Send a message in the current channel",
         options: [
           {
@@ -34,7 +34,7 @@ module.exports = {
       },
       {
         type: 1,
-        name: "dm",
+        name: "user",
         description: "Send a message to a user via DM",
         options: [
           {
@@ -66,7 +66,7 @@ module.exports = {
     const subcommand = interaction.options.getSubcommand();
 
     // Differentiate permissions
-    const permissionKey = `send ${subcommand}`;
+    const permissionKey = `message ${subcommand}`;
 
     if (!isAllowed(permissionKey, interaction.user.id, interaction.contextType)) {
       return interaction.reply({
@@ -75,15 +75,15 @@ module.exports = {
       });
     }
 
-    if (subcommand === "channel") {
-      await handleChannelSend(interaction);
-    } else if (subcommand === "dm") {
-      await handleDmSend(interaction);
+    if (subcommand === "here") {
+      await handleChannelMsg(interaction);
+    } else if (subcommand === "user") {
+      await handleDmMsg(interaction);
     }
   },
 };
 
-async function handleChannelSend(interaction, contextType) {
+async function handleChannelMsg(interaction) {
   const message = interaction.options.getString("message");
   const count = interaction.options.getInteger("count") ?? 1;
 
@@ -195,7 +195,7 @@ async function handleChannelSend(interaction, contextType) {
   }
 }
 
-async function handleDmSend(interaction) {
+async function handleDmMsg(interaction) {
   const targetUser = interaction.options.getUser("user");
   const message = interaction.options.getString("message");
   const count = interaction.options.getInteger("count") ?? 1;
