@@ -15,10 +15,6 @@
     "reload allowlist": {
       "user": ["botOwner"],
       "guild": ["botOwner"]
-    },
-    "invite": {
-      "user": ["everyone"],
-      "guild": ["everyone"]
     }
   }
 }
